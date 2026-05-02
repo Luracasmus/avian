@@ -82,6 +82,17 @@ pub struct PhysicsPickingSettings {
     /// This setting is provided to give you fine-grained control over which cameras and entities
     /// should be used by the physics picking backend at runtime.
     pub require_markers: bool,
+
+    #[cfg(feature = "2d")]
+    /// The world space Z coordinate of the plane that rays cast from the camera intersect during picking in 2D.
+    ///
+    /// This only affects the XY coordinates that are used when querying for colliders.
+    /// Colliders outside of the plane are not ignored,
+    /// but may not appear to be picked at the position they are located visibly from a camera with perspective projection.
+    ///
+    /// The Z component of produced [`HitData::position`] is equal to this value,
+    /// and [`HitData::depth`] is equal to the distance along the  ray to its intersection point on the plane.
+    pub z_plane: f32,
 }
 
 /// An optional component that marks cameras and target entities that should be used in the [`PhysicsPickingPlugin`].
@@ -167,33 +178,39 @@ pub fn update_hits(
         #[cfg(feature = "2d")]
         {
             let mut hits: Vec<(Entity, HitData)> = vec![];
-            // Follow the ray to its intersection with the Z axis
-            let point = ray.origin.xy() - ray.direction.xy() * ray.origin.z / ray.direction.z;
 
-            spatial_query.point_intersections_callback(
-                point.adjust_precision(),
-                &filter.0,
-                |entity| {
-                    let marker_requirement =
-                        !backend_settings.require_markers || marked_targets.get(entity).is_ok();
+            // Follow the ray to its intersection with the configured Z plane
+            if let Some(distance) = ray.intersect_plane(
+                vec3(0.0, 0.0, backend_settings.z_plane),
+                InfinitePlane3d { normal: Dir3::Z },
+            ) {
+                let point = ray.get_point(distance);
 
-                    let is_pickable = pickables
-                        .get(entity)
-                        .map(|p| *p != Pickable::IGNORE)
-                        .unwrap_or(true);
+                spatial_query.point_intersections_callback(
+                    point.xy().adjust_precision(),
+                    &filter.0,
+                    |entity| {
+                        let marker_requirement =
+                            !backend_settings.require_markers || marked_targets.get(entity).is_ok();
 
-                    if marker_requirement && is_pickable {
-                        hits.push((
-                            entity,
-                            HitData::new(ray_id.camera, 0.0, Some(point.extend(0.0)), None),
-                        ));
-                    }
+                        let is_pickable = pickables
+                            .get(entity)
+                            .map(|p| *p != Pickable::IGNORE)
+                            .unwrap_or(true);
 
-                    true
-                },
-            );
+                        if marker_requirement && is_pickable {
+                            hits.push((
+                                entity,
+                                HitData::new(ray_id.camera, distance, Some(point), None),
+                            ));
+                        }
 
-            output_events.write(PointerHits::new(ray_id.pointer, hits, camera.order as f32));
+                        true
+                    },
+                );
+
+                output_events.write(PointerHits::new(ray_id.pointer, hits, camera.order as f32));
+            }
         }
         #[cfg(feature = "3d")]
         {
