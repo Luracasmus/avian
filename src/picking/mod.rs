@@ -91,7 +91,7 @@ pub struct PhysicsPickingSettings {
     /// but may not appear to be picked at the position they are located visibly from a camera with perspective projection.
     ///
     /// The Z component of produced [`HitData::position`] is equal to this value,
-    /// and [`HitData::depth`] is equal to the distance along the  ray to its intersection point on the plane.
+    /// and [`HitData::depth`] is equal to the distance along the ray to its intersection point on the plane.
     pub z_plane: f32,
 }
 
