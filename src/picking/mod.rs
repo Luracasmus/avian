@@ -88,7 +88,7 @@ pub struct PhysicsPickingSettings {
     ///
     /// This only affects the XY coordinates that are used when querying for colliders.
     /// Colliders outside of the plane are not ignored,
-    /// but may not appear to be picked at the position they are located visibly from a camera with perspective projection.
+    /// but may not appear to be picked at the position they are located visibly.
     ///
     /// The Z component of produced [`HitData::position`] is equal to this value,
     /// and [`HitData::depth`] is equal to the distance along the ray to its intersection point on the plane.
