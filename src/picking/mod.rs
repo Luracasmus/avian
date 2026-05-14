@@ -83,15 +83,17 @@ pub struct PhysicsPickingSettings {
     /// should be used by the physics picking backend at runtime.
     pub require_markers: bool,
 
-    #[cfg(feature = "2d")]
-    /// The world space Z coordinate of the plane that rays cast from the camera intersect during picking in 2D.
+    /// The world space Z coordinate of the plane that rays cast from the camera
+    /// intersect during picking in 2D.
     ///
     /// This only affects the XY coordinates that are used when querying for colliders.
-    /// Colliders outside of the plane are not ignored,
-    /// but may not appear to be picked at the position they are located visibly.
+    /// Colliders outside of the plane are not ignored, but may not appear to be picked
+    /// at the position they are located visibly.
     ///
-    /// The Z component of produced [`HitData::position`] is equal to this value,
-    /// and [`HitData::depth`] is equal to the distance along the ray to its intersection point on the plane.
+    /// The Z component of the produced [`HitData::position`] is equal to this value,
+    /// and [`HitData::depth`] is equal to the distance along the ray to its intersection
+    /// point on the plane.
+    #[cfg(feature = "2d")]
     pub z_plane: f32,
 }
 
