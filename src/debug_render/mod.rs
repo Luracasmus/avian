@@ -563,7 +563,7 @@ fn change_mesh_visibility(
             if hide_mesh {
                 *visibility = Visibility::Hidden;
             } else {
-                *visibility = Visibility::Visible;
+                *visibility = Visibility::Inherited;
             }
         }
     }
