@@ -33,8 +33,11 @@ fn setup(
         Transform::from_xyz(0.0, 0.0, 1.0), // We have to start slightly away from the Z axis, since now everything is drawing at Z = 0
     ));
 
+    // For example purposes, define a custom picking plane that can be moved with the E and Q keys.
+    // Using a picking plane like this is not required, but the Z coordinates of 2D colliders
+    // should match `PhysicsPickingSettings::z_plane` for them to be picked at the correct XY coordinates.
     commands
-        .spawn((PickingPlane, Transform::default(), Visibility::Visible)) // [`Transform::default()`] is at Z = 0, which matches the default `z_plane` in [`PhysicsPickingSettings`]
+        .spawn((PickingPlane, Visibility::Visible, Transform::default()))
         .with_children(|child_spawner_commands| {
             let square_sprite = Sprite {
                 color: Color::srgb(0.7, 0.7, 0.8),
